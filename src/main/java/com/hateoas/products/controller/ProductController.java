@@ -51,6 +51,9 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<?> productById(@PathVariable int id) {
         Product product = productRepository.findById(id).get();
-        return ResponseEntity.status(HttpStatus.OK).body(product);
+
+        EntityModel<Product> productEntity = productLinksBuilder.toModel(product);
+
+        return ResponseEntity.status(HttpStatus.OK).body(productEntity);
     }
 }

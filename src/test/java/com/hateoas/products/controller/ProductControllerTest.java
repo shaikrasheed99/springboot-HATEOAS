@@ -88,4 +88,23 @@ public class ProductControllerTest {
 
         verify(productRepository, times(1)).findById(iPhone.getId());
     }
+
+    @Test
+    void shouldBeAbleToReturnProductByIdWithHATEOASLinks() throws Exception {
+        when(productRepository.findById(iPhone.getId())).thenReturn(Optional.ofNullable(iPhone));
+        EntityModel<Product> productEntity = productLinksBuilder.toModel(iPhone);
+        Link selfLink = productEntity.getRequiredLink(IanaLinkRelations.SELF);
+        Link collectionLink = productEntity.getRequiredLink(IanaLinkRelations.COLLECTION);
+
+        ResultActions result = mockMvc.perform(get("/products/{id}", iPhone.getId()));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(iPhone.getId()))
+                .andExpect(jsonPath("$.name").value(iPhone.getName()))
+                .andExpect(jsonPath("$._links.self.href").value(selfLink.getHref()))
+                .andExpect(jsonPath("$._links.collection.href").value(collectionLink.getHref()))
+                .andDo(print());
+
+        verify(productRepository, times(1)).findById(iPhone.getId());
+    }
 }
