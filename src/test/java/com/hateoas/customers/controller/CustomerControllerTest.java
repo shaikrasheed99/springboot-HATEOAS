@@ -75,6 +75,24 @@ public class CustomerControllerTest {
     }
 
     @Test
+    void shouldBeAbleToReturnCustomersWithHATEOASLinksForEveryCustomer() throws Exception {
+        when(customerRepository.findAll()).thenReturn(customers);
+        Link selfLink = linkTo(methodOn(CustomerController.class).customers()).withSelfRel();
+        Link customerLink = linkTo(methodOn(CustomerController.class).getById(ironman.getId())).withSelfRel();
+
+        ResultActions result = mockMvc.perform(get("/customers"));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.customerList[0].id").value(customers.get(0).getId()))
+                .andExpect(jsonPath("$._embedded.customerList[0].name").value(customers.get(0).getName()))
+                .andExpect(jsonPath("$._embedded.customerList[0]._links.self.href").value(customerLink.getHref()))
+                .andExpect(jsonPath("$._links.self.href").value(selfLink.getHref()))
+                .andDo(print());
+
+        verify(customerRepository, times(1)).findAll();
+    }
+
+    @Test
     void shouldBeAbleToReturnCustomerById() throws Exception {
         when(customerRepository.findById(ironman.getId())).thenReturn(Optional.ofNullable(ironman));
 

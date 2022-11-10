@@ -29,6 +29,11 @@ public class CustomerController {
     public ResponseEntity<?> customers() {
         List<Customer> customers = (List<Customer>) customerRepository.findAll();
 
+        customers.forEach(customer -> {
+            Link link = linkTo(methodOn(CustomerController.class).getById(customer.getId())).withSelfRel();
+            customer.add(link);
+        });
+
         CollectionModel<Customer> customerCollection = CollectionModel.of(customers);
         Link selfLink = linkTo(methodOn(CustomerController.class).customers()).withSelfRel();
         customerCollection.add(selfLink);
