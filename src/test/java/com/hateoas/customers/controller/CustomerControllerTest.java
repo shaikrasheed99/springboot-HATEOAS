@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -32,10 +33,11 @@ public class CustomerControllerTest {
     @MockBean
     private CustomerRepository customerRepository;
     private List<Customer> customers;
+    private Customer ironman;
 
     @BeforeEach
     void setUp() {
-        Customer ironman = new Customer("Ironman");
+        ironman = new Customer("Ironman");
         Customer thor = new Customer("Thor");
         Customer thanos = new Customer("Thanos");
         customers = new ArrayList<>();
@@ -62,13 +64,19 @@ public class CustomerControllerTest {
 
         ResultActions result = mockMvc.perform(get("/customers"));
 
-        result.andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.customerList[0].name").value(customers.get(0).getName()))
-                .andExpect(jsonPath("$._embedded.customerList[1].id").value(customers.get(1).getId()))
-                .andExpect(jsonPath("$._embedded.customerList[2].name").value(customers.get(2).getName()))
-                .andExpect(jsonPath("$._links.self.href").value(link.getHref()))
-                .andDo(print());
+        result.andExpect(status().isOk()).andExpect(jsonPath("$._embedded.customerList[0].name").value(customers.get(0).getName())).andExpect(jsonPath("$._embedded.customerList[1].id").value(customers.get(1).getId())).andExpect(jsonPath("$._embedded.customerList[2].name").value(customers.get(2).getName())).andExpect(jsonPath("$._links.self.href").value(link.getHref())).andDo(print());
 
         verify(customerRepository, times(1)).findAll();
+    }
+
+    @Test
+    void shouldBeAbleToReturnCustomerById() throws Exception {
+        when(customerRepository.findById(ironman.getId())).thenReturn(Optional.ofNullable(ironman));
+
+        ResultActions result = mockMvc.perform(get("/customers/{customerId}", ironman.getId()));
+
+        result.andExpect(status().isOk()).andDo(print());
+
+        verify(customerRepository, times(1)).findById(ironman.getId());
     }
 }

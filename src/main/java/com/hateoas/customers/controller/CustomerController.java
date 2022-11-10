@@ -7,6 +7,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,5 +34,12 @@ public class CustomerController {
         customerCollection.add(selfLink);
 
         return ResponseEntity.status(HttpStatus.OK).body(customerCollection);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> customerById(@PathVariable int id) {
+        Customer customer = customerRepository.findById(id).get();
+
+        return ResponseEntity.status(HttpStatus.OK).body(customer);
     }
 }
