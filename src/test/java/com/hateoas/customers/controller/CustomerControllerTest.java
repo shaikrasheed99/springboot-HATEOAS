@@ -64,7 +64,12 @@ public class CustomerControllerTest {
 
         ResultActions result = mockMvc.perform(get("/customers"));
 
-        result.andExpect(status().isOk()).andExpect(jsonPath("$._embedded.customerList[0].name").value(customers.get(0).getName())).andExpect(jsonPath("$._embedded.customerList[1].id").value(customers.get(1).getId())).andExpect(jsonPath("$._embedded.customerList[2].name").value(customers.get(2).getName())).andExpect(jsonPath("$._links.self.href").value(link.getHref())).andDo(print());
+        result.andExpect(status().isOk()).
+                andExpect(jsonPath("$._embedded.customerList[0].name").value(customers.get(0).getName()))
+                .andExpect(jsonPath("$._embedded.customerList[1].id").value(customers.get(1).getId()))
+                .andExpect(jsonPath("$._embedded.customerList[2].name").value(customers.get(2).getName()))
+                .andExpect(jsonPath("$._links.self.href").value(link.getHref()))
+                .andDo(print());
 
         verify(customerRepository, times(1)).findAll();
     }
@@ -76,6 +81,22 @@ public class CustomerControllerTest {
         ResultActions result = mockMvc.perform(get("/customers/{customerId}", ironman.getId()));
 
         result.andExpect(status().isOk()).andDo(print());
+
+        verify(customerRepository, times(1)).findById(ironman.getId());
+    }
+
+    @Test
+    void shouldBeAbleToReturnCustomerByIdWithHATEOASLink() throws Exception {
+        when(customerRepository.findById(ironman.getId())).thenReturn(Optional.ofNullable(ironman));
+        Link link = linkTo(methodOn(CustomerController.class).getById(ironman.getId())).withSelfRel();
+
+        ResultActions result = mockMvc.perform(get("/customers/{customerId}", ironman.getId()));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(ironman.getId()))
+                .andExpect(jsonPath("$.name").value(ironman.getName()))
+                .andExpect(jsonPath("$._links.self.href").value(link.getHref()))
+                .andDo(print());
 
         verify(customerRepository, times(1)).findById(ironman.getId());
     }

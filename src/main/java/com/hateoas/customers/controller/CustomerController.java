@@ -37,8 +37,11 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> customerById(@PathVariable int id) {
+    public ResponseEntity<?> getById(@PathVariable int id) {
         Customer customer = customerRepository.findById(id).get();
+
+        Link selfLink = linkTo(methodOn(CustomerController.class).getById(id)).withSelfRel();
+        customer.add(selfLink);
 
         return ResponseEntity.status(HttpStatus.OK).body(customer);
     }
