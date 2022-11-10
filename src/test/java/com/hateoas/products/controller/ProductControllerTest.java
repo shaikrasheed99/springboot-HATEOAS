@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -27,10 +28,11 @@ public class ProductControllerTest {
     @MockBean
     private ProductRepository productRepository;
     private List<Product> products;
+    private Product iPhone;
 
     @BeforeEach
     void setUp() {
-        Product iPhone = new Product("iPhone", 80000);
+        iPhone = new Product("iPhone", 80000);
         Product macBook_pro = new Product("MacBook Pro", 200000);
         products = Arrays.asList(iPhone, macBook_pro);
     }
@@ -44,5 +46,16 @@ public class ProductControllerTest {
         result.andExpect(status().isOk()).andDo(print());
 
         verify(productRepository, times(1)).findAll();
+    }
+
+    @Test
+    void shouldBeAbleReturnProductById() throws Exception {
+        when(productRepository.findById(iPhone.getId())).thenReturn(Optional.ofNullable(iPhone));
+
+        ResultActions result = mockMvc.perform(get("/products/{id}", iPhone.getId()));
+
+        result.andExpect(status().isOk()).andDo(print());
+
+        verify(productRepository, times(1)).findById(iPhone.getId());
     }
 }
