@@ -1,12 +1,10 @@
 package com.hateoas.customers.model;
 
-import org.springframework.hateoas.RepresentationModel;
-
 import javax.persistence.*;
 
 @Entity
 @Table(name = "customers")
-public class Customer extends RepresentationModel<Customer> {
+public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
