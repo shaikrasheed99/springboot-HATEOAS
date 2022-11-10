@@ -31,8 +31,10 @@ public class CustomerController {
         List<Customer> customers = (List<Customer>) customerRepository.findAll();
 
         customers.forEach(customer -> {
-            Link link = linkTo(methodOn(CustomerController.class).getById(customer.getId())).withSelfRel();
-            customer.add(link);
+            Link customerSelfLink = linkTo(methodOn(CustomerController.class).getById(customer.getId())).withSelfRel();
+            Link customerCollectionLink = linkTo(methodOn(CustomerController.class).customers()).withRel(IanaLinkRelations.COLLECTION);
+            customer.add(customerSelfLink);
+            customer.add(customerCollectionLink);
         });
 
         CollectionModel<Customer> customerCollection = CollectionModel.of(customers);

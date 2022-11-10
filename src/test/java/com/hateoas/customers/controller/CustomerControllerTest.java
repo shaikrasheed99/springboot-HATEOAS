@@ -79,14 +79,16 @@ public class CustomerControllerTest {
     void shouldBeAbleToReturnCustomersWithHATEOASLinksForEveryCustomer() throws Exception {
         when(customerRepository.findAll()).thenReturn(customers);
         Link selfLink = linkTo(methodOn(CustomerController.class).customers()).withSelfRel();
-        Link customerLink = linkTo(methodOn(CustomerController.class).getById(ironman.getId())).withSelfRel();
+        Link customerSelfLink = linkTo(methodOn(CustomerController.class).getById(ironman.getId())).withSelfRel();
+        Link customerCollectionLink = linkTo(methodOn(CustomerController.class).customers()).withRel(IanaLinkRelations.COLLECTION);
 
         ResultActions result = mockMvc.perform(get("/customers"));
 
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.customerList[0].id").value(customers.get(0).getId()))
                 .andExpect(jsonPath("$._embedded.customerList[0].name").value(customers.get(0).getName()))
-                .andExpect(jsonPath("$._embedded.customerList[0]._links.self.href").value(customerLink.getHref()))
+                .andExpect(jsonPath("$._embedded.customerList[0]._links.self.href").value(customerSelfLink.getHref()))
+                .andExpect(jsonPath("$._embedded.customerList[0]._links.collection.href").value(customerCollectionLink.getHref()))
                 .andExpect(jsonPath("$._links.self.href").value(selfLink.getHref()))
                 .andDo(print());
 
