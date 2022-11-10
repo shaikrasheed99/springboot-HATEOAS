@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -114,6 +115,24 @@ public class CustomerControllerTest {
                 .andExpect(jsonPath("$.id").value(ironman.getId()))
                 .andExpect(jsonPath("$.name").value(ironman.getName()))
                 .andExpect(jsonPath("$._links.self.href").value(link.getHref()))
+                .andDo(print());
+
+        verify(customerRepository, times(1)).findById(ironman.getId());
+    }
+
+    @Test
+    void shouldBeAbleToReturnCustomerByIdWithHATEOASLinkOfSelfAndCollection() throws Exception {
+        when(customerRepository.findById(ironman.getId())).thenReturn(Optional.ofNullable(ironman));
+        Link selfLink = linkTo(methodOn(CustomerController.class).getById(ironman.getId())).withSelfRel();
+        Link collectionLink = linkTo(methodOn(CustomerController.class).customers()).withRel(IanaLinkRelations.COLLECTION);
+
+        ResultActions result = mockMvc.perform(get("/customers/{id}", ironman.getId()));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(ironman.getId()))
+                .andExpect(jsonPath("$.name").value(ironman.getName()))
+                .andExpect(jsonPath("$._links.self.href").value(selfLink.getHref()))
+                .andExpect(jsonPath("$._links.collection.href").value(collectionLink.getHref()))
                 .andDo(print());
 
         verify(customerRepository, times(1)).findById(ironman.getId());

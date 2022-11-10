@@ -3,6 +3,7 @@ package com.hateoas.customers.controller;
 import com.hateoas.customers.model.Customer;
 import com.hateoas.customers.model.CustomerRepository;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,9 @@ public class CustomerController {
         Customer customer = customerRepository.findById(id).get();
 
         Link selfLink = linkTo(methodOn(CustomerController.class).getById(id)).withSelfRel();
+        Link collectionLink = linkTo(methodOn(CustomerController.class).customers()).withRel(IanaLinkRelations.COLLECTION);
         customer.add(selfLink);
+        customer.add(collectionLink);
 
         return ResponseEntity.status(HttpStatus.OK).body(customer);
     }
