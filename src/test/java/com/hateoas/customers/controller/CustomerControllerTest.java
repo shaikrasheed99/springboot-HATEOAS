@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.hateoas.Link;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -15,8 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -47,6 +51,23 @@ public class CustomerControllerTest {
         ResultActions result = mockMvc.perform(get("/customers"));
 
         result.andExpect(status().isOk()).andDo(print());
+
+        verify(customerRepository, times(1)).findAll();
+    }
+
+    @Test
+    void shouldBeAbleToReturnCustomersWithHATEOASLinks() throws Exception {
+        when(customerRepository.findAll()).thenReturn(customers);
+        Link link = linkTo(methodOn(CustomerController.class).customers()).withSelfRel();
+
+        ResultActions result = mockMvc.perform(get("/customers"));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.customerList[0].name").value(customers.get(0).getName()))
+                .andExpect(jsonPath("$._embedded.customerList[1].id").value(customers.get(1).getId()))
+                .andExpect(jsonPath("$._embedded.customerList[2].name").value(customers.get(2).getName()))
+                .andExpect(jsonPath("$._links.self.href").value(link.getHref()))
+                .andDo(print());
 
         verify(customerRepository, times(1)).findAll();
     }
