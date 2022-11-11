@@ -1,7 +1,9 @@
 package com.hateoas.orders.model;
 
 import com.hateoas.customers.model.Customer;
+import com.hateoas.customers.model.CustomerRepository;
 import com.hateoas.products.model.Product;
+import com.hateoas.products.model.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class OrderRepositoryTest {
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
+    private ProductRepository productRepository;
     private Order ironmanOrdersIphone;
     private List<Order> orders;
     private Customer ironman;
@@ -27,8 +33,10 @@ public class OrderRepositoryTest {
     void setUp() {
         ironman = new Customer("Ironman");
         Customer thor = new Customer("Thor");
+        customerRepository.saveAll(Arrays.asList(ironman, thor));
         iPhone = new Product("iPhone", 80000);
         Product macBook = new Product("MacBook", 200000);
+        productRepository.saveAll(Arrays.asList(iPhone, macBook));
         int quantity = 2;
         ironmanOrdersIphone = new Order(ironman, iPhone, quantity, quantity * iPhone.getPrice());
         Order ironmanOrdersMacBook = new Order(ironman, macBook, quantity, quantity * macBook.getPrice());
