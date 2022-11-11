@@ -32,18 +32,21 @@ public class OrderControllerTest {
     private OrderRepository orderRepository;
     private Customer ironman;
     private List<Order> ordersOfIronman;
+    private Product iPhone;
+    private List<Order> ordersOfIphone;
 
     @BeforeEach
     void setUp() {
         ironman = new Customer("Ironman");
         Customer thor = new Customer("Thor");
-        Product iPhone = new Product("iPhone", 80000);
+        iPhone = new Product("iPhone", 80000);
         Product macBook = new Product("MacBook", 200000);
         Order ironmanOrdersIphone = new Order(ironman, iPhone, 1, iPhone.getPrice());
         Order ironmanOrdersMacbook = new Order(ironman, macBook, 1, macBook.getPrice());
         Order thorOrdersMacbook = new Order(thor, macBook, 1, macBook.getPrice());
         Order thorOrdersIphone = new Order(thor, iPhone, 1, iPhone.getPrice());
         ordersOfIronman = Arrays.asList(ironmanOrdersIphone, ironmanOrdersMacbook);
+        ordersOfIphone = Arrays.asList(ironmanOrdersIphone, thorOrdersIphone);
     }
 
     @Test
@@ -67,5 +70,16 @@ public class OrderControllerTest {
         result.andExpect(status().isOk()).andDo(print());
 
         verify(orderRepository, times(1)).findById(order.getId());
+    }
+
+    @Test
+    void shouldBeAbleReturnOrdersOfAProduct() throws Exception {
+        when(orderRepository.findByProductId(iPhone.getId())).thenReturn(ordersOfIphone);
+
+        ResultActions result = mockMvc.perform(get("/products/{id}/orders", ironman.getId()));
+
+        result.andExpect(status().isOk()).andDo(print());
+
+        verify(orderRepository, times(1)).findByProductId(iPhone.getId());
     }
 }

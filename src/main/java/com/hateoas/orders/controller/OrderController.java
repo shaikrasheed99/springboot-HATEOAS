@@ -29,4 +29,10 @@ public class OrderController {
         Order order = orderRepository.findById(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(order);
     }
+
+    @GetMapping("/products/{productId}/orders")
+    public ResponseEntity<?> ordersOfProduct(@PathVariable int productId) {
+        List<Order> ordersOfProduct = orderRepository.findByProductId(productId);
+        return ResponseEntity.status(HttpStatus.OK).body(ordersOfProduct);
+    }
 }
