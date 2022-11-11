@@ -2,6 +2,7 @@ package com.hateoas.link_builders;
 
 import com.hateoas.customers.controller.CustomerController;
 import com.hateoas.customers.model.Customer;
+import com.hateoas.orders.controller.OrderController;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
@@ -19,9 +20,11 @@ public class CustomerLinksBuilder implements RepresentationModelAssembler<Custom
 
         Link selfLink = linkTo(methodOn(CustomerController.class).getById(customer.getId())).withSelfRel();
         Link collectionLink = linkTo(methodOn(CustomerController.class).customers()).withRel(IanaLinkRelations.COLLECTION);
+        Link ordersLink = linkTo(methodOn(OrderController.class).ordersOfCustomer(customer.getId())).withRel("orders");
 
         customerEntity.add(selfLink);
         customerEntity.add(collectionLink);
+        customerEntity.add(ordersLink);
 
         return customerEntity;
     }

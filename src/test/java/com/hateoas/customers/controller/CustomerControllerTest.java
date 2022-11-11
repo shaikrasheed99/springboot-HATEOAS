@@ -2,13 +2,14 @@ package com.hateoas.customers.controller;
 
 import com.hateoas.customers.model.Customer;
 import com.hateoas.customers.model.CustomerRepository;
+import com.hateoas.link_builders.CustomerLinksBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -30,7 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class CustomerControllerTest {
     @Autowired
     private MockMvc mockMvc;
-
+    @Autowired
+    private CustomerLinksBuilder customerLinksBuilder;
     @MockBean
     private CustomerRepository customerRepository;
     private List<Customer> customers;
@@ -78,9 +80,11 @@ public class CustomerControllerTest {
     @Test
     void shouldBeAbleToReturnCustomersWithHATEOASLinksForEveryCustomer() throws Exception {
         when(customerRepository.findAll()).thenReturn(customers);
+        EntityModel<Customer> customerEntityModel = customerLinksBuilder.toModel(ironman);
         Link selfLink = linkTo(methodOn(CustomerController.class).customers()).withSelfRel();
-        Link customerSelfLink = linkTo(methodOn(CustomerController.class).getById(ironman.getId())).withSelfRel();
-        Link customerCollectionLink = linkTo(methodOn(CustomerController.class).customers()).withRel(IanaLinkRelations.COLLECTION);
+        Link customerSelfLink = customerEntityModel.getRequiredLink("self");
+        Link customerCollectionLink = customerEntityModel.getRequiredLink("collection");
+        Link customerOrdersLink = customerEntityModel.getRequiredLink("orders");
 
         ResultActions result = mockMvc.perform(get("/customers"));
 
@@ -89,6 +93,7 @@ public class CustomerControllerTest {
                 .andExpect(jsonPath("$._embedded.customerList[0].name").value(customers.get(0).getName()))
                 .andExpect(jsonPath("$._embedded.customerList[0]._links.self.href").value(customerSelfLink.getHref()))
                 .andExpect(jsonPath("$._embedded.customerList[0]._links.collection.href").value(customerCollectionLink.getHref()))
+                .andExpect(jsonPath("$._embedded.customerList[0]._links.orders.href").value(customerOrdersLink.getHref()))
                 .andExpect(jsonPath("$._links.self.href").value(selfLink.getHref()))
                 .andDo(print());
 
@@ -109,24 +114,27 @@ public class CustomerControllerTest {
     @Test
     void shouldBeAbleToReturnCustomerByIdWithHATEOASLink() throws Exception {
         when(customerRepository.findById(ironman.getId())).thenReturn(Optional.ofNullable(ironman));
-        Link link = linkTo(methodOn(CustomerController.class).getById(ironman.getId())).withSelfRel();
+        EntityModel<Customer> customerEntityModel = customerLinksBuilder.toModel(ironman);
+        Link selfLink = customerEntityModel.getRequiredLink("self");
 
         ResultActions result = mockMvc.perform(get("/customers/{customerId}", ironman.getId()));
 
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(ironman.getId()))
                 .andExpect(jsonPath("$.name").value(ironman.getName()))
-                .andExpect(jsonPath("$._links.self.href").value(link.getHref()))
+                .andExpect(jsonPath("$._links.self.href").value(selfLink.getHref()))
                 .andDo(print());
 
         verify(customerRepository, times(1)).findById(ironman.getId());
     }
 
     @Test
-    void shouldBeAbleToReturnCustomerByIdWithHATEOASLinkOfSelfAndCollection() throws Exception {
+    void shouldBeAbleToReturnCustomerByIdWithHATEOASLinkOfSelfAndCollectionAndOrders() throws Exception {
         when(customerRepository.findById(ironman.getId())).thenReturn(Optional.ofNullable(ironman));
-        Link selfLink = linkTo(methodOn(CustomerController.class).getById(ironman.getId())).withSelfRel();
-        Link collectionLink = linkTo(methodOn(CustomerController.class).customers()).withRel(IanaLinkRelations.COLLECTION);
+        EntityModel<Customer> customerEntityModel = customerLinksBuilder.toModel(ironman);
+        Link selfLink = customerEntityModel.getRequiredLink("self");
+        Link collectionLink = customerEntityModel.getRequiredLink("collection");
+        Link ordersLink = customerEntityModel.getRequiredLink("orders");
 
         ResultActions result = mockMvc.perform(get("/customers/{id}", ironman.getId()));
 
@@ -135,6 +143,7 @@ public class CustomerControllerTest {
                 .andExpect(jsonPath("$.name").value(ironman.getName()))
                 .andExpect(jsonPath("$._links.self.href").value(selfLink.getHref()))
                 .andExpect(jsonPath("$._links.collection.href").value(collectionLink.getHref()))
+                .andExpect(jsonPath("$._links.orders.href").value(ordersLink.getHref()))
                 .andDo(print());
 
         verify(customerRepository, times(1)).findById(ironman.getId());
