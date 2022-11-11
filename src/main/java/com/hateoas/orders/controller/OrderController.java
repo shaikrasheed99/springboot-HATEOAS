@@ -74,6 +74,9 @@ public class OrderController {
     @GetMapping("/products/{productId}/orders/{id}")
     public ResponseEntity<?> orderOfProductById(@PathVariable int productId, @PathVariable int id) {
         Order order = orderRepository.findById(id).get();
-        return ResponseEntity.status(HttpStatus.OK).body(order);
+
+        EntityModel<Order> orderEntityModel = orderLinksBuilder.toModel(order);
+
+        return ResponseEntity.status(HttpStatus.OK).body(orderEntityModel);
     }
 }

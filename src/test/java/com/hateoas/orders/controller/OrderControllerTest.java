@@ -175,4 +175,28 @@ public class OrderControllerTest {
 
         verify(orderRepository, times(1)).findById(order.getId());
     }
+
+    @Test
+    void shouldBeAbleToReturnOrderOfAProductByOrderIdWithHATEOASLinks() throws Exception {
+        Order order = ordersOfIphone.get(0);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
+        EntityModel<Order> orderEntityModel = orderLinksBuilder.toModel(order);
+        List<Link> selfLinks = orderEntityModel.getLinks("self");
+        Link customerLink = orderEntityModel.getRequiredLink("customer");
+        Link productLink = orderEntityModel.getRequiredLink("product");
+
+        ResultActions result = mockMvc.perform(get("/products/{id}/orders/{id}", iPhone.getId(), order.getId()));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(order.getId()))
+                .andExpect(jsonPath("$.customer.name").value(order.getCustomer().getName()))
+                .andExpect(jsonPath("$.product.id").value(order.getProduct().getId()))
+                .andExpect(jsonPath("$._links.self[0].href").value(selfLinks.get(0).getHref()))
+                .andExpect(jsonPath("$._links.self[1].href").value(selfLinks.get(1).getHref()))
+                .andExpect(jsonPath("$._links.customer.href").value(customerLink.getHref()))
+                .andExpect(jsonPath("$._links.product.href").value(productLink.getHref()))
+                .andDo(print());
+
+        verify(orderRepository, times(1)).findById(order.getId());
+    }
 }
