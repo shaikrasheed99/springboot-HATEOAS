@@ -1,17 +1,28 @@
 package com.hateoas.orders.controller;
 
+import com.hateoas.link_builders.OrderLinksBuilder;
 import com.hateoas.orders.model.Order;
 import com.hateoas.orders.model.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class OrderController {
+    @Autowired
+    private OrderLinksBuilder orderLinksBuilder;
     private final OrderRepository orderRepository;
 
     public OrderController(OrderRepository orderRepository) {
@@ -21,7 +32,18 @@ public class OrderController {
     @GetMapping("/customers/{customerId}/orders")
     public ResponseEntity<?> ordersOfCustomer(@PathVariable int customerId) {
         List<Order> ordersOfCustomer = orderRepository.findByCustomerId(customerId);
-        return ResponseEntity.status(HttpStatus.OK).body(ordersOfCustomer);
+        List<EntityModel<Order>> orderEntities = new ArrayList<>();
+
+        ordersOfCustomer.forEach(order -> {
+            EntityModel<Order> orderEntity = orderLinksBuilder.toModel(order);
+            orderEntities.add(orderEntity);
+        });
+
+        CollectionModel<EntityModel<Order>> orderCollectionEntity = CollectionModel.of(orderEntities);
+        Link selfLink = linkTo(methodOn(OrderController.class).ordersOfCustomer(customerId)).withSelfRel();
+        orderCollectionEntity.add(selfLink);
+
+        return ResponseEntity.status(HttpStatus.OK).body(orderCollectionEntity);
     }
 
     @GetMapping("/customers/{customerId}/orders/{id}")
