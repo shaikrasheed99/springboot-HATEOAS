@@ -35,8 +35,7 @@ public class OrderController {
         List<EntityModel<Order>> orderEntities = new ArrayList<>();
 
         ordersOfCustomer.forEach(order -> {
-            EntityModel<Order> orderEntity = orderLinksBuilder.toModel(order);
-            orderEntities.add(orderEntity);
+            orderEntities.add(orderLinksBuilder.toModel(order));
         });
 
         CollectionModel<EntityModel<Order>> orderCollectionEntity = CollectionModel.of(orderEntities);

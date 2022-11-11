@@ -37,8 +37,7 @@ public class ProductController {
         List<EntityModel<Product>> productEntities = new ArrayList<>();
 
         products.forEach(product -> {
-            EntityModel<Product> productEntity = productLinksBuilder.toModel(product);
-            productEntities.add(productEntity);
+            productEntities.add(productLinksBuilder.toModel(product));
         });
 
         CollectionModel<EntityModel<Product>> productCollection = CollectionModel.of(productEntities);

@@ -37,8 +37,7 @@ public class CustomerController {
         List<EntityModel<Customer>> customerEntities = new ArrayList<>();
 
         customers.forEach(customer -> {
-            EntityModel<Customer> customerEntity = customerLinksBuilder.toModel(customer);
-            customerEntities.add(customerEntity);
+            customerEntities.add(customerLinksBuilder.toModel(customer));
         });
 
         CollectionModel<EntityModel<Customer>> customerCollection = CollectionModel.of(customerEntities);
