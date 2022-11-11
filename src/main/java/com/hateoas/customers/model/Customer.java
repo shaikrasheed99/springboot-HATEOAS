@@ -1,6 +1,9 @@
 package com.hateoas.customers.model;
 
+import com.hateoas.orders.model.Order;
+
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "customers")
@@ -9,6 +12,8 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
+    @OneToMany(mappedBy = "customer")
+    private List<Order> orders;
 
     public Customer() {
     }

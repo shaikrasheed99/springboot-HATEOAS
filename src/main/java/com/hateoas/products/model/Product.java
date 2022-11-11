@@ -1,6 +1,9 @@
 package com.hateoas.products.model;
 
+import com.hateoas.orders.model.Order;
+
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -10,6 +13,8 @@ public class Product {
     private int id;
     private String name;
     private float price;
+    @OneToMany(mappedBy = "product")
+    private List<Order> orders;
 
     public Product() {
     }
