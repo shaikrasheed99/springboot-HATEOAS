@@ -1,5 +1,6 @@
 package com.hateoas.link_builders;
 
+import com.hateoas.orders.controller.OrderController;
 import com.hateoas.products.controller.ProductController;
 import com.hateoas.products.model.Product;
 import org.springframework.hateoas.EntityModel;
@@ -19,9 +20,11 @@ public class ProductLinksBuilder implements RepresentationModelAssembler<Product
 
         Link selfLink = linkTo(methodOn(ProductController.class).productById(product.getId())).withSelfRel();
         Link collectionLink = linkTo(methodOn(ProductController.class).products()).withRel(IanaLinkRelations.COLLECTION);
+        Link ordersLink = linkTo(methodOn(OrderController.class).ordersOfProduct(product.getId())).withRel("orders");
 
         productEntity.add(selfLink);
         productEntity.add(collectionLink);
+        productEntity.add(ordersLink);
 
         return productEntity;
     }

@@ -63,6 +63,7 @@ public class ProductControllerTest {
         EntityModel<Product> productEntityModel = productLinksBuilder.toModel(iPhone);
         Link productSelfLink = productEntityModel.getRequiredLink(IanaLinkRelations.SELF);
         Link productCollectionLink = productEntityModel.getRequiredLink(IanaLinkRelations.COLLECTION);
+        Link productOrdersLink = productEntityModel.getRequiredLink("orders");
         Link productsLink = linkTo(methodOn(ProductController.class).products()).withSelfRel();
 
         ResultActions result = mockMvc.perform(get("/products"));
@@ -72,6 +73,7 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$._embedded.productList[1].id").value(products.get(1).getId()))
                 .andExpect(jsonPath("$._embedded.productList[0]._links.self.href").value(productSelfLink.getHref()))
                 .andExpect(jsonPath("$._embedded.productList[0]._links.collection.href").value(productCollectionLink.getHref()))
+                .andExpect(jsonPath("$._embedded.productList[0]._links.orders.href").value(productOrdersLink.getHref()))
                 .andExpect(jsonPath("$._links.self.href").value(productsLink.getHref()))
                 .andDo(print());
 
@@ -95,6 +97,7 @@ public class ProductControllerTest {
         EntityModel<Product> productEntity = productLinksBuilder.toModel(iPhone);
         Link selfLink = productEntity.getRequiredLink(IanaLinkRelations.SELF);
         Link collectionLink = productEntity.getRequiredLink(IanaLinkRelations.COLLECTION);
+        Link ordersLink = productEntity.getRequiredLink("orders");
 
         ResultActions result = mockMvc.perform(get("/products/{id}", iPhone.getId()));
 
@@ -103,6 +106,7 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.name").value(iPhone.getName()))
                 .andExpect(jsonPath("$._links.self.href").value(selfLink.getHref()))
                 .andExpect(jsonPath("$._links.collection.href").value(collectionLink.getHref()))
+                .andExpect(jsonPath("$._links.orders.href").value(ordersLink.getHref()))
                 .andDo(print());
 
         verify(productRepository, times(1)).findById(iPhone.getId());
