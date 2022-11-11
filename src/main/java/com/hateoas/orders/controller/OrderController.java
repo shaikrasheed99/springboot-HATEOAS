@@ -25,7 +25,7 @@ public class OrderController {
     }
 
     @GetMapping("/customers/{customerId}/orders/{id}")
-    public ResponseEntity<?> orderById(@PathVariable int customerId, @PathVariable int id) {
+    public ResponseEntity<?> orderOfCustomerById(@PathVariable int customerId, @PathVariable int id) {
         Order order = orderRepository.findById(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(order);
     }
@@ -34,5 +34,11 @@ public class OrderController {
     public ResponseEntity<?> ordersOfProduct(@PathVariable int productId) {
         List<Order> ordersOfProduct = orderRepository.findByProductId(productId);
         return ResponseEntity.status(HttpStatus.OK).body(ordersOfProduct);
+    }
+
+    @GetMapping("/products/{productId}/orders/{id}")
+    public ResponseEntity<?> orderOfProductById(@PathVariable int productId, @PathVariable int id) {
+        Order order = orderRepository.findById(id).get();
+        return ResponseEntity.status(HttpStatus.OK).body(order);
     }
 }

@@ -76,10 +76,22 @@ public class OrderControllerTest {
     void shouldBeAbleReturnOrdersOfAProduct() throws Exception {
         when(orderRepository.findByProductId(iPhone.getId())).thenReturn(ordersOfIphone);
 
-        ResultActions result = mockMvc.perform(get("/products/{id}/orders", ironman.getId()));
+        ResultActions result = mockMvc.perform(get("/products/{id}/orders", iPhone.getId()));
 
         result.andExpect(status().isOk()).andDo(print());
 
         verify(orderRepository, times(1)).findByProductId(iPhone.getId());
+    }
+
+    @Test
+    void shouldBeAbleToReturnOrderOfAProductByOrderId() throws Exception {
+        Order order = ordersOfIphone.get(0);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
+
+        ResultActions result = mockMvc.perform(get("/products/{id}/orders/{id}", iPhone.getId(), order.getId()));
+
+        result.andExpect(status().isOk()).andDo(print());
+
+        verify(orderRepository, times(1)).findById(order.getId());
     }
 }
