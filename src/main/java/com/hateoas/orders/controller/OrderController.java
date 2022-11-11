@@ -58,7 +58,17 @@ public class OrderController {
     @GetMapping("/products/{productId}/orders")
     public ResponseEntity<?> ordersOfProduct(@PathVariable int productId) {
         List<Order> ordersOfProduct = orderRepository.findByProductId(productId);
-        return ResponseEntity.status(HttpStatus.OK).body(ordersOfProduct);
+        List<EntityModel<Order>> orderEntities = new ArrayList<>();
+
+        ordersOfProduct.forEach(order -> {
+            orderEntities.add(orderLinksBuilder.toModel(order));
+        });
+
+        CollectionModel<EntityModel<Order>> collectionEntity = CollectionModel.of(orderEntities);
+        Link selfLink = linkTo(methodOn(OrderController.class).ordersOfProduct(productId)).withSelfRel();
+        collectionEntity.add(selfLink);
+
+        return ResponseEntity.status(HttpStatus.OK).body(collectionEntity);
     }
 
     @GetMapping("/products/{productId}/orders/{id}")

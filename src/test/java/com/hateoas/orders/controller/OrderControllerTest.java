@@ -140,6 +140,31 @@ public class OrderControllerTest {
     }
 
     @Test
+    void shouldBeAbleReturnOrdersOfAProductWithHATEOASLinks() throws Exception {
+        when(orderRepository.findByProductId(iPhone.getId())).thenReturn(ordersOfIphone);
+        Order order = ordersOfIphone.get(0);
+        EntityModel<Order> orderEntityModel = orderLinksBuilder.toModel(order);
+        List<Link> orderSelfLinks = orderEntityModel.getLinks("self");
+        Link orderCustomerLink = orderEntityModel.getRequiredLink("customer");
+        Link orderProductLink = orderEntityModel.getRequiredLink("product");
+
+        ResultActions result = mockMvc.perform(get("/products/{id}/orders", iPhone.getId()));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.orderList[0].id").value(order.getId()))
+                .andExpect(jsonPath("$._embedded.orderList[0].customer.name").value(order.getCustomer().getName()))
+                .andExpect(jsonPath("$._embedded.orderList[0].product.id").value(order.getProduct().getId()))
+                .andExpect(jsonPath("$._embedded.orderList[0]._links.self[0].href").value(orderSelfLinks.get(0).getHref()))
+                .andExpect(jsonPath("$._embedded.orderList[0]._links.self[1].href").value(orderSelfLinks.get(1).getHref()))
+                .andExpect(jsonPath("$._embedded.orderList[0]._links.customer.href").value(orderCustomerLink.getHref()))
+                .andExpect(jsonPath("$._embedded.orderList[0]._links.product.href").value(orderProductLink.getHref()))
+                .andExpect(jsonPath("$._links.self.href").value(orderProductLink.getHref()))
+                .andDo(print());
+
+        verify(orderRepository, times(1)).findByProductId(iPhone.getId());
+    }
+
+    @Test
     void shouldBeAbleToReturnOrderOfAProductByOrderId() throws Exception {
         Order order = ordersOfIphone.get(0);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
