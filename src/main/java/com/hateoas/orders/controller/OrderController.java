@@ -49,7 +49,10 @@ public class OrderController {
     @GetMapping("/customers/{customerId}/orders/{id}")
     public ResponseEntity<?> orderOfCustomerById(@PathVariable int customerId, @PathVariable int id) {
         Order order = orderRepository.findById(id).get();
-        return ResponseEntity.status(HttpStatus.OK).body(order);
+
+        EntityModel<Order> orderEntity = orderLinksBuilder.toModel(order);
+
+        return ResponseEntity.status(HttpStatus.OK).body(orderEntity);
     }
 
     @GetMapping("/products/{productId}/orders")
