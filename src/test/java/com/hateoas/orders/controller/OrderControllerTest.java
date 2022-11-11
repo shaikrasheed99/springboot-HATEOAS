@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -54,5 +55,17 @@ public class OrderControllerTest {
         result.andExpect(status().isOk()).andDo(print());
 
         verify(orderRepository, times(1)).findByCustomerId(ironman.getId());
+    }
+
+    @Test
+    void shouldBeAbleToReturnOrderOfACustomerByOrderId() throws Exception {
+        Order order = ordersOfIronman.get(0);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.ofNullable(order));
+
+        ResultActions result = mockMvc.perform(get("/customers/{id}/orders/{id}", ironman.getId(), order.getId()));
+
+        result.andExpect(status().isOk()).andDo(print());
+
+        verify(orderRepository, times(1)).findById(order.getId());
     }
 }

@@ -23,4 +23,10 @@ public class OrderController {
         List<Order> ordersOfCustomer = orderRepository.findByCustomerId(customerId);
         return ResponseEntity.status(HttpStatus.OK).body(ordersOfCustomer);
     }
+
+    @GetMapping("/customers/{customerId}/orders/{id}")
+    public ResponseEntity<?> orderById(@PathVariable int customerId, @PathVariable int id) {
+        Order order = orderRepository.findById(id).get();
+        return ResponseEntity.status(HttpStatus.OK).body(order);
+    }
 }
